@@ -9,7 +9,7 @@
 -author("tihon").
 
 %% API
--export([to_lower/1, get_priv_dir/1, get_random_non_numeric_string/1, hexstring/1, hash_sha256/1, hash_secret/1]).
+-export([to_lower/1, get_priv_dir/1, get_random_non_numeric_string/1, hexstring/1, hash_sha256/1, hash_secret/1, bin_to_hexstr/1]).
 
 -spec to_lower(binary() | string()) -> binary() | string().
 to_lower(Bin) when is_binary(Bin) ->
@@ -60,6 +60,11 @@ hash_secret(Secret) ->
 -spec hash_sha256(binary() | string()) -> binary().
 hash_sha256(Data) ->
   hexstring(crypto:hash(sha256, Data)).
+
+-spec bin_to_hexstr(binary()) -> string().
+bin_to_hexstr(Bin) ->
+  lists:flatten([io_lib:format("~2.16.0B", [X]) ||
+    X <- binary_to_list(Bin)]).
 
 hexstring(<<X:128/big-unsigned-integer>>) ->
   lists:flatten(io_lib:format("~32.16.0b", [X]));
