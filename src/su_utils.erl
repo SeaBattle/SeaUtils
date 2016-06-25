@@ -9,7 +9,7 @@
 -author("tihon").
 
 %% API
--export([to_lower/1, get_priv_dir/1]).
+-export([to_lower/1, get_priv_dir/1, get_random_non_numeric_string/1, hexstring/1, hash_sha256/1, hash_secret/1]).
 
 -spec to_lower(binary() | string()) -> binary() | string().
 to_lower(Bin) when is_binary(Bin) ->
@@ -26,3 +26,46 @@ get_priv_dir(App) ->
              Dir
          end,
   Path ++ "/priv/".
+
+-spec get_random_non_numeric_string(non_neg_integer()) -> string().
+get_random_non_numeric_string(MaxLen) ->
+  String = string:to_lower(uuid:to_string(uuid:uuid4())),
+  Filtered = lists:filter(
+    fun(A) ->
+      not (A =:= $0
+        orelse A =:= $1
+        orelse A =:= $2
+        orelse A =:= $3
+        orelse A =:= $4
+        orelse A =:= $5
+        orelse A =:= $6
+        orelse A =:= $7
+        orelse A =:= $8
+        orelse A =:= $9
+        orelse A =:= $o
+        orelse A =:= $l
+        orelse A =:= $-)
+    end, String),
+  if
+    length(Filtered) < MaxLen -> get_random_non_numeric_string(MaxLen);
+    true ->
+      {Secret, _} = lists:split(MaxLen, Filtered),
+      Secret
+  end.
+
+-spec hash_secret(string()) -> binary().
+hash_secret(Secret) ->
+  list_to_binary(string:to_upper(hash_sha256(Secret))).
+
+-spec hash_sha256(binary() | string()) -> binary().
+hash_sha256(Data) ->
+  hexstring(crypto:hash(sha256, Data)).
+
+hexstring(<<X:128/big-unsigned-integer>>) ->
+  lists:flatten(io_lib:format("~32.16.0b", [X]));
+hexstring(<<X:160/big-unsigned-integer>>) ->
+  lists:flatten(io_lib:format("~40.16.0b", [X]));
+hexstring(<<X:256/big-unsigned-integer>>) ->
+  lists:flatten(io_lib:format("~64.16.0b", [X]));
+hexstring(<<X:512/big-unsigned-integer>>) ->
+  lists:flatten(io_lib:format("~128.16.0b", [X])).
