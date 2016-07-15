@@ -9,7 +9,15 @@
 -author("tihon").
 
 %% API
--export([to_lower/1, get_priv_dir/1, get_random_non_numeric_string/1, hexstring/1, hash_sha256/1, hash_secret/1, bin_to_hexstr/1]).
+-export([
+  to_lower/1,
+  get_priv_dir/1,
+  get_random_non_numeric_string/1,
+  hexstring/1,
+  hash_sha256/1,
+  hash_secret/1,
+  bin_to_hexstr/1,
+  get_random_element/1]).
 
 -spec to_lower(binary() | string()) -> binary() | string().
 to_lower(Bin) when is_binary(Bin) ->
@@ -26,6 +34,13 @@ get_priv_dir(App) ->
              Dir
          end,
   Path ++ "/priv/".
+
+get_random_element([]) -> undefined;
+get_random_element([Element]) -> Element;
+get_random_element(Elements) ->
+  random:seed(),
+  N = random:uniform(length(Elements)),
+  lists:nth(N, Elements).
 
 -spec get_random_non_numeric_string(non_neg_integer()) -> string().
 get_random_non_numeric_string(MaxLen) ->
