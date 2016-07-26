@@ -74,7 +74,7 @@ hash_secret(Secret) ->
 
 -spec hash_sha256(binary() | string()) -> binary().
 hash_sha256(Data) ->
-  hexstring(crypto:hash(sha256, Data)).
+  list_to_binary(hexstring(crypto:hash(sha256, Data))).
 
 -spec bin_to_hexstr(binary()) -> string().
 bin_to_hexstr(Bin) ->
